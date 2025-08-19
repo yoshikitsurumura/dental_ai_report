@@ -1,0 +1,10 @@
+fastapi==0.111.0
+uvicorn==0.29.0
+reportlab
+python-multipart
+jinja2
+Pillow
+google-generativeai
+python-dotenv
+markdown
+gunicorn

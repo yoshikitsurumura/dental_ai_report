@@ -1,0 +1,17 @@
+# Credentials
+dental-ai-key.pem
+.env
+
+# User uploads
+uploads/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Screenshots
+スクリーンショット*.png

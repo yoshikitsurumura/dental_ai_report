@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI診断レポート入力フォーム</title>
+    <style>
+        /* 地域密着型・ファミリー向けスタイリング */
+        body { 
+            font-family: "Hiragino Sans", "ヒラギノ角ゴ ProN W3", "Yu Gothic", "游ゴシック", "Meiryo UI", "メイリオ", Arial, sans-serif; 
+            line-height: 1.6; 
+            padding: 20px; 
+            background-color: #FFF8E1; /* 優しいクリーム色 */
+            color: #424242; /* 落ち着いたグレー */
+        }
+        h1 { 
+            text-align: center; 
+            color: #FF7043; /* 暖色系のオレンジ */
+            margin-bottom: 30px;
+            font-size: 2.2em;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+        form { 
+            max-width: 800px; 
+            margin: 0 auto; 
+            padding: 30px; 
+            border: none; /* 枠線をなくす */
+            border-radius: 15px; /* 柔らかな丸み */
+            background-color: #FFFFFF; 
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1); /* 柔らかい影 */
+        }
+        .form-section { margin-bottom: 30px; }
+        .form-section h2 { 
+            border-bottom: 3px solid #FFAB91; /* 優しいオレンジの線 */
+            padding-bottom: 10px; 
+            margin-bottom: 20px; 
+            color: #FF7043; /* 暖色系のオレンジ */
+            font-size: 1.6em;
+            text-align: center;
+        }
+        .form-group { margin-bottom: 20px; }
+        label { 
+            display: block; 
+            margin-bottom: 8px; 
+            font-weight: bold; 
+            color: #616161; /* 少し濃いグレー */
+            font-size: 1.1em;
+        }
+        input[type="text"], input[type="number"], input[type="date"], select, input[type="file"], textarea { /* textarea を追加 */
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #FFCCBC; /* 優しいオレンジの枠線 */
+            border-radius: 8px; /* 丸み */
+            box-sizing: border-box;
+            font-size: 1em;
+            color: #424242;
+        }
+        input[type="file"] { padding: 8px; }
+        .radio-group label { display: inline-block; margin-right: 15px; font-weight: normal; }
+        .radio-group input[type="radio"] { width: auto; margin-right: 5px; }
+        button {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background-color: #FF7043; /* 暖色系のオレンジ */
+            color: white;
+            border: none;
+            border-radius: 10px; /* 丸み */
+            cursor: pointer;
+            font-size: 1.2em;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
+        button:hover { background-color: #F4511E; /* 少し濃いオレンジ */ }
+        #loading-overlay {
+            display: none; /* 初期状態では非表示 */
+            position: fixed; /* 画面全体を覆う */
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.8); /* 半透明の白 */
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        .spinner {
+            border: 8px solid #f3f3f3; /* Light grey */
+            border-top: 8px solid #FF7043; /* Orange */
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        #loading-message {
+            font-size: 1.3em;
+            color: #FF7043; /* 暖色系のオレンジ */
+            font-weight: bold;
+        }
+        .error-message {
+            color: #D32F2F; /* 濃い赤色 */
+            font-size: 0.9em;
+            font-weight: bold;
+            display: block;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>AI診断レポート入力フォーム (MVP)</h1>
+    <form id="diagnosisForm" enctype="multipart/form-data">
+        <!-- ...フォームの中身... -->
+        <div class="form-section">
+            <h2>患者情報</h2>
+            <div class="form-group">
+                <label for="patient_name">患者氏名</label>
+                <input type="text" id="patient_name" name="patient_name" required>
+            </div>
+            <div class="form-group">
+                <label for="patient_age">年齢</label>
+                <input type="number" id="patient_age" name="patient_age" required>
+            </div>
+            <div class="form-group">
+                <label for="birth_date">生年月日</label>
+                <input type="date" id="birth_date" name="birth_date">
+            </div>
+            <div class="form-group">
+                <label>性別</label>
+                <div class="radio-group">
+                    <label><input type="radio" name="gender" value="male"> 男性</label>
+                    <label><input type="radio" name="gender" value="female"> 女性</label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="guardian_name">保護者氏名</label>
+                <input type="text" id="guardian_name" name="guardian_name">
+            </div>
+            <div class="form-group">
+                <label for="phone_number">連絡先電話番号</label>
+                <input type="text" id="phone_number" name="phone_number">
+            </div>
+            <div class="form-group">
+                <label for="email">メールアドレス</label>
+                <input type="text" id="email" name="email">
+            </div>
+            <div class="form-group">
+                <label for="chief_complaint">主訴</label>
+                <textarea id="chief_complaint" name="chief_complaint" rows="3"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="medical_history">既往歴・アレルギー</label>
+                <textarea id="medical_history" name="medical_history" rows="3"></textarea>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h2>問診項目</h2>
+            <div class="form-group">
+                <label>口呼吸の有無</label>
+                <div class="radio-group">
+                    <label><input type="radio" name="mouth_breathing" value="yes"> はい</label>
+                    <label><input type="radio" name="mouth_breathing" value="no"> いいえ</label>
+                    <label><input type="radio" name="mouth_breathing" value="unknown"> 不明</label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>指しゃぶりの有無</label>
+                <div class="radio-group">
+                    <label><input type="radio" name="thumb_sucking" value="yes"> はい</label>
+                    <label><input type="radio" name="thumb_sucking" value="no"> いいえ</label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>爪噛みの有無</label>
+                <div class="radio-group">
+                    <label><input type="radio" name="nail_biting" value="yes"> はい</label>
+                    <label><input type="radio" name="nail_biting" value="no"> いいえ</label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>舌癖の有無</label>
+                <div class="radio-group">
+                    <label><input type="radio" name="tongue_thrust" value="yes"> はい</label>
+                    <label><input type="radio" name="tongue_thrust" value="no"> いいえ</label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>いびきの有無</label>
+                <div class="radio-group">
+                    <label><input type="radio" name="snoring" value="yes"> はい</label>
+                    <label><input type="radio" name="snoring" value="no"> いいえ</label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>扁桃腺の腫れの有無</label>
+                <div class="radio-group">
+                    <label><input type="radio" name="tonsil_swelling" value="yes"> はい</label>
+                    <label><input type="radio" name="tonsil_swelling" value="no"> いいえ</label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>アレルギー性鼻炎の有無</label>
+                <div class="radio-group">
+                    <label><input type="radio" name="allergic_rhinitis" value="yes"> はい</label>
+                    <label><input type="radio" name="allergic_rhinitis" value="no"> いいえ</label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>食事中の音（クチャクチャ音など）</label>
+                <div class="radio-group">
+                    <label><input type="radio" name="eating_sounds" value="yes"> はい</label>
+                    <label><input type="radio" name="eating_sounds" value="no"> いいえ</label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>嚥下パターン（舌突出型）</label>
+                <div class="radio-group">
+                    <label><input type="radio" name="swallowing_pattern" value="yes"> はい</label>
+                    <label><input type="radio" name="swallowing_pattern" value="no"> いいえ</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h2>口腔内検査項目</h2>
+            <div class="form-group">
+                <label>上顎歯列の状態</label>
+                <select name="upper_jaw_condition">
+                    <option value="normal">正常</option>
+                    <option value="crowding">叢生</option>
+                    <option value="spacing">空隙歯列</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>下顎歯列の状態</label>
+                <select name="lower_jaw_condition">
+                    <option value="normal">正常</option>
+                    <option value="crowding">叢生</option>
+                    <option value="spacing">空隙歯列</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="midline_deviation">正中線のずれ (mm)</label>
+                <input type="number" id="midline_deviation" name="midline_deviation" step="0.1" value="0">
+            </div>
+            <div class="form-group">
+                <label>交叉咬合の有無</label>
+                <div class="radio-group">
+                    <label><input type="radio" name="crossbite" value="yes"> はい</label>
+                    <label><input type="radio" name="crossbite" value="no"> いいえ</label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>舌の位置（安静時）</label>
+                <select name="tongue_position">
+                    <option value="normal">正常</option>
+                    <option value="low">低位舌</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>口唇閉鎖</label>
+                <select name="lip_closure">
+                    <option value="possible">可能</option>
+                    <option value="impossible">不可能</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>顔貌</label>
+                <select name="facial_appearance">
+                    <option value="normal">正常</option>
+                    <option value="adenoid">アデノイド様顔貌</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>TMD症状の有無</label>
+                <div class="radio-group">
+                    <label><input type="radio" name="tmd_symptoms" value="yes"> はい</label>
+                    <label><input type="radio" name="tmd_symptoms" value="no"> いいえ</label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="other_findings">その他口腔内所見</label>
+                <textarea id="other_findings" name="other_findings" rows="3"></textarea>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h2>口腔内写真</h2>
+            <div class="form-group">
+                <label for="oral_photo_front">正面観</label>
+                <input type="file" id="oral_photo_front" name="oral_photo_front" accept="image/*">
+            </div>
+            <div class="form-group">
+                <label for="oral_photo_upper_occlusal">上顎咬合面観</label>
+                <input type="file" id="oral_photo_upper_occlusal" name="oral_photo_upper_occlusal" accept="image/*">
+            </div>
+            <div class="form-group">
+                <label for="oral_photo_lower_occlusal">下顎咬合面観</label>
+                <input type="file" id="oral_photo_lower_occlusal" name="oral_photo_lower_occlusal" accept="image/*">
+            </div>
+            <div class="form-group">
+                <label for="oral_photo_right_lateral">右側方観</label>
+                <input type="file" id="oral_photo_right_lateral" name="oral_photo_right_lateral" accept="image/*">
+            </div>
+            <div class="form-group">
+                <label for="oral_photo_left_lateral">左側方観</label>
+                <input type="file" id="oral_photo_left_lateral" name="oral_photo_left_lateral" accept="image/*">
+            </div>
+        </div>
+
+        <button type="submit" id="submit-button">診断を実行する</button>
+    </form>
+    <div id="loading-overlay">
+        <div class="spinner"></div>
+        <div id="loading-message">診断レポートを生成中です...しばらくお待ちください。</div>
+    </div>
+
+    <script>
+        const diagnosisForm = document.getElementById('diagnosisForm');
+        const loadingOverlay = document.getElementById('loading-overlay');
+        const submitButton = document.getElementById('submit-button');
+
+        function clearErrorMessages() {
+            const errorMessages = diagnosisForm.querySelectorAll('.error-message');
+            errorMessages.forEach(msg => msg.remove());
+        }
+
+        diagnosisForm.addEventListener('submit', async function(event) {
+            event.preventDefault();
+            clearErrorMessages();
+
+            const formData = new FormData(diagnosisForm);
+
+            loadingOverlay.style.display = 'flex';
+            submitButton.disabled = true;
+            submitButton.style.backgroundColor = '#FFAB91';
+
+            try {
+                const response = await fetch('/diagnose', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const contentDisposition = response.headers.get('Content-Disposition');
+                    let filename = 'diagnosis_report.pdf';
+                    if (contentDisposition) {
+                        const filenameMatch = contentDisposition.match(/filename="?(.+)"?/);
+                        if (filenameMatch && filenameMatch.length > 1) {
+                            filename = decodeURIComponent(filenameMatch[1].replace(/['"]/g, ''));
+                        }
+                    }
+                    
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = filename;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    window.URL.revokeObjectURL(url);
+
+                    alert('診断レポートのダウンロードが開始されました。');
+                } else if (response.status === 422) {
+                    const errorData = await response.json();
+                    alert('入力内容にエラーがあります。各項目を確認してください。');
+                    errorData.detail.forEach(err => {
+                        const fieldName = err.loc[1];
+                        const message = err.msg;
+                        const formElement = document.querySelector(`[name="${fieldName}"]`);
+                        if (formElement) {
+                            const errorSpan = document.createElement('span');
+                            errorSpan.className = 'error-message';
+                            errorSpan.textContent = `エラー: ${message}`;
+                            if (formElement.type === 'radio') {
+                                formElement.parentElement.parentElement.appendChild(errorSpan);
+                            } else {
+                                formElement.parentElement.appendChild(errorSpan);
+                            }
+                        }
+                    });
+                } else {
+                    const errorData = await response.json();
+                    alert('診断レポートの生成に失敗しました: ' + (errorData.message || '不明なエラー'));
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('エラーが発生しました。ネットワーク接続を確認してください。');
+            } finally {
+                loadingOverlay.style.display = 'none';
+                submitButton.disabled = false;
+                submitButton.style.backgroundColor = '#FF7043';
+            }
+        });
+    </script>
+</body>
+</html>
